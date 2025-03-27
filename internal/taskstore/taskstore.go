@@ -43,7 +43,7 @@ func (ts *TaskStore) GetTask(id int) (Task, error) {
 	if exists {
 		return t, nil
 	} else {
-		return Task{}, fmt.Errorf("task with id: %d not found!", id)
+		return Task{}, fmt.Errorf("task with id: %d not found", id)
 	}
 }
 
@@ -60,4 +60,60 @@ func (ts *TaskStore) DeleteTask(id int) error {
 	// delete task otherwise
 	delete(ts.tasks, id)
 	return nil
+}
+
+func (ts *TaskStore) DeleteAllTasks() error {
+	ts.Lock()
+	defer ts.Unlock()
+
+	clear(ts.tasks)
+
+	return nil
+}
+
+func (ts *TaskStore) GetAllTasks() []Task {
+	ts.Lock()
+	defer ts.Unlock()
+
+	var tasks = make([]Task, 0, len(ts.tasks))
+	for _, task := range ts.tasks {
+		tasks = append(tasks, task)
+	}
+
+	return tasks
+}
+
+func (ts *TaskStore) GetTasksByTag(tag string) []Task {
+	ts.Lock()
+	defer ts.Unlock()
+
+	var tasks []Task
+
+taskloop:
+	for _, task := range ts.tasks {
+		for _, taskTag := range task.Tags {
+			if taskTag == tag {
+				tasks = append(tasks, task)
+				continue taskloop // early iteration for efficiency
+			}
+		}
+	}
+
+	return tasks
+}
+
+func (ts *TaskStore) GetTasksByDueDate(year int, month time.Month, day int) []Task {
+	ts.Lock()
+	defer ts.Unlock()
+
+	var tasks []Task
+
+	for _, task := range ts.tasks {
+		y, m, d := task.Due.Date()
+		if y == year && m == month && d == day {
+			tasks = append(tasks, task)
+		}
+	}
+
+	return tasks
 }
