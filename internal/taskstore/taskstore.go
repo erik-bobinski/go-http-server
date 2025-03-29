@@ -1,4 +1,6 @@
-// package to provide a simple in-memory data storage for our tasks API
+// package to provide a simple in-memory data storage for the tasks API
+// we could use a more sophisticated DB like MongoDB for a better implementation
+// this package is within internal/ because its not a real DB that should be used by others
 package taskstore
 
 import (
